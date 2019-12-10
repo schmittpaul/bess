@@ -53,6 +53,7 @@ before_script:
 script:
   # travis_wait extends the 10-min timeout to 30mins.
   - travis_wait 30 ./container_build.py bess
+  - core/bessd -t
   - ./container_build.py kmod_buildtest
   - (cd core && ./all_test --gtest_shuffle)  # TcpFlowReconstructTest requires working directory to be `core/`
   - coverage2 run -m unittest discover -v
