@@ -1,4 +1,5 @@
-/*
+/* BESS version based on cryptopANT 1.2.1 (2019-09-30)
+ * Modified by Paul Schmitt 
  * Copyright (C) 2004-2019 by the University of Southern California
  * $Id: 89d8a3f3fea9f54bc16a49c7c9d8788716f83f8f $
  *
