@@ -29,7 +29,7 @@
 
 #include "../module.h"
 
-// Swap source and destination IP addresses and UDP/TCP ports
+// Anonymize IP addresses using cryptopANT algorithm
 class cryptopANT final : public Module {
  public:
   cryptopANT() : Module() { max_allowed_workers_ = Worker::kMaxWorkers; }
