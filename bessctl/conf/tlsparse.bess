@@ -1,0 +1,7 @@
+s::Sink()
+
+myport::PMDPort(port_id=0, num_inc_q=1, num_out_q=1)
+input0::QueueInc(port=myport, qid=0) #This module will read from myport on queue 0
+
+input0 -> tls::TlsParser()
+tls -> s
