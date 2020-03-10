@@ -24,17 +24,17 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef BESS_MODULES_CRYPTOPANT_H_
-#define BESS_MODULES_CRYPTOPANT_H_
+#ifndef BESS_MODULES_DECRYPTOPANT_H_
+#define BESS_MODULES_DECRYPTOPANT_H_
 
 #include "../module.h"
 
-// Anonymize IP addresses using cryptopANT algorithm
-class cryptopANT final : public Module {
+// UNDO cryptopant operation
+class decryptopANT final : public Module {
  public:
-  cryptopANT() : Module() { max_allowed_workers_ = Worker::kMaxWorkers; }
+  decryptopANT() : Module() { max_allowed_workers_ = Worker::kMaxWorkers; }
 
   void ProcessBatch(Context *ctx, bess::PacketBatch *batch) override;
 };
 
-#endif  // BESS_MODULES_CRYPTOPANT_H_
+#endif  // BESS_MODULES_DECRYPTOPANT_H_
