@@ -1,5 +1,5 @@
 /* BESS version based on cryptopANT 1.2.1 (2019-09-30)
- * Modified by Paul Schmitt 
+ * Modified by Paul Schmitt
  * Copyright (C) 2004-2019 by the University of Southern California
  * $Id: 89d8a3f3fea9f54bc16a49c7c9d8788716f83f8f $
  *
@@ -88,7 +88,7 @@ static struct {
   BF_KEY bfkey;
 } scramble_key;
 
-static uint8_t	ivec[64];
+static uint8_t ivec[64];
 
 /* statistics */
 static long ipv4_cache_hits = 0;
@@ -456,7 +456,7 @@ uint32_t scramble_ip4(uint32_t input, int pass_bits) {
   };
   uint32_t *cp;
 
-  //input = ntohl(input);
+  // input = ntohl(input);
   cp = ip4cache + (input >> (32 - CACHE_BITS));
 
   assert(pass_bits >= 0 && pass_bits < 33);
@@ -513,6 +513,30 @@ uint32_t scramble_ip4(uint32_t input, int pass_bits) {
   *cp = (output >> (32 - CACHE_BITS));
 
   return (output ^ input);
+}
+
+/* reverse map scrambled IP addresses, all network byte order */
+uint32_t unscramble_ip4(uint32_t input, int pass_bits) {
+  int i;
+  uint32_t guess, res;
+
+  guess = input; /* Starting with the input seems
+                  * a good idea because some bits
+                  * may be passed through
+                  * unchanged */
+  for (i = 32; i > 0; --i) {
+    res = scramble_ip4(guess, pass_bits);
+    /* we're only interested in flipping the
+     * higher bit, don't care about the rest */
+    res ^= input;
+    if (res == 0)
+      return guess;
+    guess ^= res;
+  }
+  // unreachable, since there should be always a match
+  //(since we're zeroing out at least one bit per iteration)
+  assert(0);
+  return (0xffffffff); /* cannot find the match */
 }
 
 /* scramble ipv6 address in place, in network byte order */
