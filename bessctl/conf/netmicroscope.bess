@@ -2,6 +2,7 @@ import scapy.all as scapy
 
 # 'show module' command shows detailed stats/parameters
 
+
 pkt_size = int($BESS_PKT_SIZE!'60')
 assert(60 <= pkt_size <= 1522)
 
@@ -16,15 +17,31 @@ pkt_data = bytes(pkt)
 # the desied load level, especially when flow duration is pareto distribution
 
 #FlowGen(template=pkt_data, pps=1e6, flow_rate = 1e4, flow_duration = 10.0, \
-#        arrival='exponential', duration='pareto', quick_rampup=True) -> nm::netmicroscope()#crypto::cryptopANT()
+#        arrival='exponential', duration='pareto', quick_rampup=True) #-> nm0::netmicroscope()
+myport::PMDPort(port_id=0, num_inc_q=1, num_out_q=0)
+input0::QueueInc(port=myport, qid=0) #This module will read from myport on queue 0      
 
-s::Sink()
-nm::netmicroscope()
-myport::PMDPort(port_id=0, num_inc_q=1, num_out_q=1)
-input0::QueueInc(port=myport, qid=0) #This module will read from myport on queue 0
+#input0 -> stats::nm_stats()
+#input0 -> nm0::netmicroscope()
 
-input0 -> nm#crypto::cryptopANT()
+
+
+stats::nm_stats()
+bess.add_tc('slow', policy='rate_limit', resource='count', limit={'count': 1000})
+stats.attach_task('slow')
+#stats -> s::Sink()
+nm0::netmicroscope()
+nm1::netmicroscope()
+
+
+
+input0 -> rr::RoundRobin(gates=[0, 1],mode='packet')#crypto::cryptopANT()
 #crypto -> nm
+rr:0 -> nm0
+rr:1 -> nm1
 
+#nm0 -> stats::nm_stats()
+#nm1 -> stats
 
-nm -> s
+#nm0 -> s
+#nm1 -> s
