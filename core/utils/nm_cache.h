@@ -41,10 +41,10 @@ class NM_Flowcache {
  public:
   // 5 tuple id to identify a flow from a packet header information.
   struct FlowTuple {
-    uint32_t src_ip;
-    uint32_t dst_ip;
-    uint16_t src_port;
-    uint16_t dst_port;
+    uint32_t client_ip;
+    uint32_t server_ip;
+    uint16_t client_port;
+    uint16_t server_port;
     uint8_t protocol;
   };
 
@@ -64,26 +64,26 @@ class NM_Flowcache {
   // both directions of the flow map to the same key
   struct fastHash {
     uint64_t operator()(const FlowTuple &ft) const {
-      std::size_t src = std::hash<uint32_t>()(ft.src_ip);
-      std::size_t dst = std::hash<uint32_t>()(ft.dst_ip);
-      std::size_t sport = std::hash<uint16_t>()(ft.src_port);
-      std::size_t dport = std::hash<uint16_t>()(ft.dst_port);
+      std::size_t client = std::hash<uint32_t>()(ft.client_ip);
+      std::size_t server = std::hash<uint32_t>()(ft.server_ip);
+      std::size_t cport = std::hash<uint16_t>()(ft.client_port);
+      std::size_t sport = std::hash<uint16_t>()(ft.server_port);
       std::size_t proto = std::hash<uint8_t>()(ft.protocol);
 
-      return src ^ dst ^ sport ^ dport ^ proto;
+      return client ^ server ^ cport ^ sport ^ proto;
     }
   };
 
   // to compare two FlowTuple for equality in a hash table
   struct EqualTo {
     bool operator()(const FlowTuple &id1, const FlowTuple &id2) const {
-      bool ips = (id1.src_ip == id2.src_ip) && (id1.dst_ip == id2.dst_ip);
+      bool ips = (id1.client_ip == id2.client_ip) && (id1.server_ip == id2.server_ip);
       bool ports =
-          (id1.src_port == id2.src_port) && (id1.dst_port == id2.dst_port);
+          (id1.client_port == id2.client_port) && (id1.server_port == id2.server_port);
       bool ipsreversed =
-          (id1.src_ip == id2.dst_ip) && (id1.dst_ip == id2.src_ip);
+          (id1.client_ip == id2.server_ip) && (id1.server_ip == id2.client_ip);
       bool portsreversed =
-          (id1.src_port == id2.dst_port) && (id1.dst_port == id2.src_port);
+          (id1.client_port == id2.server_port) && (id1.server_port == id2.client_port);
       return ((ips && ports) || (ipsreversed && portsreversed)) &&
              (id1.protocol == id2.protocol);
     }
