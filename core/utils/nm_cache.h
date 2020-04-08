@@ -48,16 +48,34 @@ class NM_Flowcache {
     uint8_t protocol;
   };
 
+  struct FlowCounters {
+    uint32_t clientBytes;
+    uint32_t serverBytes;
+    uint32_t clientPackets;
+    uint32_t serverPackets;
+
+    void Reset() {
+      clientBytes = 0;
+      serverBytes = 0;
+      clientPackets = 0;
+      serverPackets = 0;
+    }
+  };
+
   // Statistics to keep for a flow
   class Flow {
    public:
-    int pkts;  // packet counter
-    int pktsup;
-    int pktsdown;
+    FlowCounters fc;
     FlowTuple ft;
 
-    Flow(FlowTuple new_tuple)
-        : pkts(0), pktsup(0), pktsdown(0), ft(new_tuple){};
+    Flow(FlowTuple new_tuple) : fc(), ft(new_tuple){};
+  };
+
+  class Service {
+   public:
+    std::string service;
+    std::string serverName;
+    uint64_t TTL;
   };
 
   // Obviously not an ideal hash, but we require it to be reversible such that
@@ -77,13 +95,14 @@ class NM_Flowcache {
   // to compare two FlowTuple for equality in a hash table
   struct EqualTo {
     bool operator()(const FlowTuple &id1, const FlowTuple &id2) const {
-      bool ips = (id1.client_ip == id2.client_ip) && (id1.server_ip == id2.server_ip);
-      bool ports =
-          (id1.client_port == id2.client_port) && (id1.server_port == id2.server_port);
+      bool ips =
+          (id1.client_ip == id2.client_ip) && (id1.server_ip == id2.server_ip);
+      bool ports = (id1.client_port == id2.client_port) &&
+                   (id1.server_port == id2.server_port);
       bool ipsreversed =
           (id1.client_ip == id2.server_ip) && (id1.server_ip == id2.client_ip);
-      bool portsreversed =
-          (id1.client_port == id2.server_port) && (id1.server_port == id2.client_port);
+      bool portsreversed = (id1.client_port == id2.server_port) &&
+                           (id1.server_port == id2.client_port);
       return ((ips && ports) || (ipsreversed && portsreversed)) &&
              (id1.protocol == id2.protocol);
     }
@@ -92,12 +111,10 @@ class NM_Flowcache {
   // The actual flowcache that workers will interact with
   CuckooMap<FlowTuple, Flow *, fastHash, EqualTo> flowcache;
 
-  NM_Flowcache(){};
+  // The servicemap that flow labelers will interact with
+  CuckooMap<FlowTuple, Service *, fastHash, EqualTo> flowServiceMap;
 
- private:
-  //  Takes a Packet to get a flow id for. Returns the 5 element identifier
-  //  for the flow that the packet belongs to
-  FlowTuple GetTuple(bess::Packet *pkt);
+  NM_Flowcache(){};
 };
 
 }  // namespace utils

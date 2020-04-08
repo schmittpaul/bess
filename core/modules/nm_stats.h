@@ -29,10 +29,20 @@
 
 #include "../module.h"
 #include "../utils/nm_cache.h"
+#include <../utils/nm_utils.h>
+//#include <../utils/aho_corasick.h>
 
 using bess::utils::NM_Flowcache;
 
 extern NM_Flowcache NMFC;
+
+struct ServiceEntry {
+  std::string name;
+  bess::utils::trie * aho_corasick_map;
+};
+
+extern std::vector<ServiceEntry> service_maps;
+
 
 class nm_stats final : public Module {
  public:

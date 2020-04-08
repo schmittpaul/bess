@@ -33,6 +33,7 @@ class netmicroscope final : public Module {
  public:
   netmicroscope() : Module() { max_allowed_workers_ = Worker::kMaxWorkers; }
 
+  void ProcessPacket(bess::Packet *pkt);
   void ProcessBatch(Context *ctx, bess::PacketBatch *batch) override;
 };
 

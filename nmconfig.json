@@ -1,0 +1,96 @@
+{
+  "Parsers": {
+    "Driver": "ring",
+    "Ifname": "dummy0",
+    "Mode": "router",
+    "Replay": false,
+    "replayMAC": "00:00:00:00:00:00",
+    "MultiThreaded": true,
+    "Clustered": false,
+    "ClusterID": 1,
+    "ZeroCopy": false,
+    "NParserThreads": 4 
+  },
+  "FlowCache": {
+    "CacheType": "ConcurrentCacheMap",
+    "EvictTime": 600000000000,
+    "CleanupTime": 300000000000,
+    "ShardsCount": 32
+  },
+  "Stats": {
+    "Run": true,
+    "Mode": "dump",
+    "Period": 10000000000,
+    "Append": false
+  },
+  "TLSCache": {
+    "EvictTime": 600000000000,
+    "CleanupTime": 300000000000,
+    "Services": [
+      {
+        "Name": "Youtube",
+        "DomainsString": ["youtube.com", "ytimg.com", "googlevideo.com"],
+        "ServiceType": 1
+      }
+    ]
+  },
+  "DNSCache": {
+    "EvictTime": 600000000000,
+    "CleanupTime": 300000000000,
+    "Services": [
+      {
+        "Name": "Youtube",
+        "DomainsString": ["youtube.com", "ytimg.com", "googlevideo.com"],
+        "ServiceType": 1
+      },
+      {
+        "Name": "Netflix",
+        "DomainsString": ["netflix.com","nflxvideo.net","nflximg.net","nflxext.com","nflximg.com","nflxso.net"],
+        "Prefixes": ["23.246.0.0/18", "37.77.184.0/21", "45.57.0.0/17", "64.120.128.0/17", "66.197.128.0/17", "108.175.32.0/20", "185.2.220.0/22", "185.9.188.0/22", "192.173.64.0/18", "198.38.96.0/19", "198.45.48.0/20", "208.75.79.0/24", "2620:10c:7000::/44", "2a00:86c0::/32"],
+        "ServiceType": 1
+
+      },
+      {
+        "Name": "Amazon",
+        "DomainsString": ["amazon.com", "amazonvideo.com", "primevideo.com", "aiv-cdn.net", "avodassets-a.akamaihd.net"],
+        "DomainsRegex": ["avod.*s3.*-.*.akamaihd.net", "amazon.*.llwnd.net", "amazon.*.lldns.net", ".*eu.amazon.fr"],
+        "ServiceType": 1
+      },
+      {
+        "Name": "Hulu",
+        "DomainsString": ["hulu.com", "huluqa.com", "huluim.com", "hulustream", "hulu.conviva.com"],
+        "DomainsRegex": [".*hulu.*.akamaihd.net", ".*hulu.*.edgekey.net",".*hulu.*.akadns.net"],
+        "ServiceType": 1
+      },
+      {
+        "Name": "Sling TV",
+        "DomainsString": ["movenetworks.com", "echostar", "slingtv", "p-cmw.movetv.com", "p-geo.movetv.com", "webapp.movetv.com", "sling.com", "p-mgcs.movetv.com", "p-drmwv.movetv.com", "p-stats.movetv.com"],
+        "DomainsRegex": [".*cdn.*.movetv.com", ".*movetv.*.footprint.net", ".*slingtv.*.fastly.net", ".*sling.*.cloudflare.net", ".*movetv.*.edgekey.net"],
+        "ServiceType": 1
+      },
+      {
+        "Name": "Sony Vue",
+        "DomainsString": ["sonytv", "totsuko.tv", "sonyvueimgs.akamaized.net", "vue.playstation.com", "vue.api.playstation.com"],
+        "DomainsRegex": [".*sonytv.*.secure.footprint.net", ".*sonytv.*.secure.akamaihd.net"],
+        "ServiceType": 1
+      },
+      {
+        "Name": "HBO",
+        "DomainsString": ["hbonow.com", "cdn.hbogo.com", "lv3.hbogo.com", "akm.hbogo.com", "hbo.com"],
+        "DomainsRegex": [".*hbogo.*.footprint.net", ".*hbogo.*.edgesuite.net"],
+        "ServiceType": 1
+      },
+      {
+        "Name": "DirecTV Now",
+        "DomainsString": ["dtvn-vod", "dtvn-live", "dtvn-discovery", "cdns.directv.com", "dtvce.com"],
+        "DomainsRegex": [".*dfwlbk.*.footprint.net", ".*dfwvod.*.footprint.net", ".*dfwlive.*.akamaized.net", ".*directv.*.edgekey.net"],
+        "ServiceType": 1
+      },
+      {
+        "Name": "Twitch",
+        "DomainsString": ["twitch.tv", "ttvnw.net", "twitchcdn.net"],
+        "ServiceType": 1
+      }
+    ]
+  }
+}
