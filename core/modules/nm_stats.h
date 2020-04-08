@@ -30,19 +30,16 @@
 #include "../module.h"
 #include "../utils/nm_cache.h"
 #include <../utils/nm_utils.h>
-//#include <../utils/aho_corasick.h>
 
 using bess::utils::NM_Flowcache;
+using bess::utils::ServiceEntry;
 
+// The NM flowcache is shared amongst all workers to update flows
 extern NM_Flowcache NMFC;
 
-struct ServiceEntry {
-  std::string name;
-  bess::utils::trie * aho_corasick_map;
-};
-
-extern std::vector<ServiceEntry> service_maps;
-
+// Services map holds ServiceEntry structs that include Aho Corasick tries for
+// each service we are interested in
+extern std::vector<ServiceEntry> services_map;
 
 class nm_stats final : public Module {
  public:

@@ -1,6 +1,3 @@
-// Copyright (c) 2016-2017, Nefeli Networks, Inc.
-// All rights reserved.
-//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 //
@@ -51,7 +48,7 @@
 
 using bess::utils::be16_t;
 using bess::utils::Ethernet;
-// using bess::utils::GetTuple;
+using bess::utils::GetTuple;
 using bess::utils::Ipv4;
 using bess::utils::NM_Flowcache;
 using bess::utils::Tcp;
@@ -64,47 +61,6 @@ enum SSLVersions {
   TLSv12 = 0x003,
   TLSv13 = 0x004,
 };
-
-NM_Flowcache::FlowTuple GetTuple2(bess::Packet *pkt) {
-  using bess::utils::Ethernet;
-  using bess::utils::Ipv4;
-  using bess::utils::Tcp;
-  using bess::utils::Udp;
-
-  Ethernet *eth = pkt->head_data<Ethernet *>();
-  Ipv4 *ip = reinterpret_cast<Ipv4 *>(eth + 1);
-  size_t ip_bytes = ip->header_length << 2;
-
-  NM_Flowcache::FlowTuple ft;
-
-  if (ip->protocol & Ipv4::kUdp) {
-    Udp *udp = reinterpret_cast<Udp *>(reinterpret_cast<uint8_t *>(ip) +
-                                       ip_bytes);  // Assumes a l-4 header
-    ft.client_ip = ip->src.value();
-    ft.server_ip = ip->dst.value();
-    ft.client_port = udp->src_port.value();
-    ft.server_port = udp->dst_port.value();
-    ft.protocol = ip->protocol;
-  } else if (ip->protocol & Ipv4::kTcp) {
-    Tcp *tcp = reinterpret_cast<Tcp *>(reinterpret_cast<uint8_t *>(ip) +
-                                       ip_bytes);  // Assumes a l-4 header
-
-    ft.protocol = ip->protocol;
-    // This is a server responding to a client
-    if ((tcp->flags & Tcp::Flag::kSyn) && (tcp->flags & Tcp::Flag::kAck)) {
-      ft.client_ip = ip->dst.value();
-      ft.server_ip = ip->src.value();
-      ft.client_port = tcp->dst_port.value();
-      ft.server_port = tcp->src_port.value();
-    } else {
-      ft.client_ip = ip->src.value();
-      ft.server_ip = ip->dst.value();
-      ft.client_port = tcp->src_port.value();
-      ft.server_port = tcp->dst_port.value();
-    }
-  }
-  return ft;
-}
 
 bool version_ok(uint8_t major, uint8_t minor) {
   if (major != 3)
@@ -187,9 +143,6 @@ static int parse_extensions(const uint8_t *data, size_t data_len,
 
 void TlsParser::ProcessBatch(Context *ctx, bess::PacketBatch *batch) {
   int cnt = batch->cnt();
-  // auto result = aho_corasick_tries[0].second.parse_text("i1.ytimg.com");
-
-  // printf("RESULT %zu\n", result.size());
 
   for (int i = 0; i < cnt; i++) {
     size_t pos = TLS_HEADER_LEN;
@@ -216,7 +169,6 @@ void TlsParser::ProcessBatch(Context *ctx, bess::PacketBatch *batch) {
 
     if (size_payload <
         OFFSET_CIPHER_LIST + 3) {  // at least one cipher + compression
-      // printf("TLS handshake header too short: %d bytes\n", size_payload);
       DropPacket(ctx, pkt);
       continue;
     }
@@ -300,23 +252,25 @@ void TlsParser::ProcessBatch(Context *ctx, bess::PacketBatch *batch) {
     }
     int resp = parse_extensions(tcp_payload + pos, len, &hostname);
     if (resp > 0) {
-      // printf("HOSTNAME %s\n", hostname);
+      // We have a TLS SNI
 
-      for (auto t = service_maps.begin(); t != service_maps.end(); ++t) {
+      // Search the Aho Corasick services map to see if the SNI matches any of
+      // the services we are configured to watch
+      for (auto t = services_map.begin(); t != services_map.end(); ++t) {
         if (t->aho_corasick_map->parse_text(hostname).size() > 0) {
-          printf("FOUND! %s %s %zu\n", t->name.c_str(), hostname,
-                 t->aho_corasick_map->parse_text(hostname).size());
+          // printf("FOUND! %s %s %zu\n", t->name.c_str(), hostname,
+          //        t->aho_corasick_map->parse_text(hostname).size());
+
+          // The SNI matches a service, add the flow to the flowServiceMap
+          NM_Flowcache::FlowTuple ft = GetTuple(pkt);
+          auto it = NMFC.flowServiceMap.Find(ft);
+          if (it == nullptr) {
+            NM_Flowcache::Service *s = new NM_Flowcache::Service();
+            s->serverName = hostname;
+            NMFC.flowServiceMap.Insert(ft, s);
+          }
           break;
         }
-      }
-
-      NM_Flowcache::FlowTuple ft = GetTuple2(pkt);
-      auto it = NMFC.flowServiceMap.Find(ft);
-
-      if (it == nullptr) {
-        NM_Flowcache::Service *s = new NM_Flowcache::Service();
-        s->serverName = hostname;
-        NMFC.flowServiceMap.Insert(ft, s);
       }
     }
     DropPacket(ctx, pkt);

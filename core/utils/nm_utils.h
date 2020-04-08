@@ -1,6 +1,3 @@
-// Copyright (c) 2016-2017, Nefeli Networks, Inc.
-// All rights reserved.
-//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 //
@@ -44,57 +41,52 @@ namespace utils {
 using bess::utils::be32_t;
 using bess::utils::NM_Flowcache;
 
-// struct ServiceEntry {
-//   std::string name;
-//   bess::utils::trie aho_corasick_map;
+struct ServiceEntry {
+  std::string name;
+  bess::utils::trie* aho_corasick_map;
+};
 
-//   // ServiceEntry() {
-//   //   name = "";
-//   //   aho_corasick_map = bess::utils::trie();
-//   // };
-// };
+NM_Flowcache::FlowTuple GetTuple(bess::Packet *pkt);
+inline NM_Flowcache::FlowTuple GetTuple(bess::Packet *pkt) {
+  using bess::utils::Ethernet;
+  using bess::utils::Ipv4;
+  using bess::utils::Tcp;
+  using bess::utils::Udp;
 
-// NM_Flowcache::FlowTuple GetTuple(bess::Packet *pkt);
-// inline NM_Flowcache::FlowTuple GetTuple(bess::Packet *pkt) {
-//   using bess::utils::Ethernet;
-//   using bess::utils::Ipv4;
-//   using bess::utils::Tcp;
-//   using bess::utils::Udp;
+  Ethernet *eth = pkt->head_data<Ethernet *>();
+  Ipv4 *ip = reinterpret_cast<Ipv4 *>(eth + 1);
+  size_t ip_bytes = ip->header_length << 2;
 
-//   Ethernet *eth = pkt->head_data<Ethernet *>();
-//   Ipv4 *ip = reinterpret_cast<Ipv4 *>(eth + 1);
-//   size_t ip_bytes = ip->header_length << 2;
+  NM_Flowcache::FlowTuple ft;
 
-//   NM_Flowcache::FlowTuple ft;
+  if (ip->protocol & Ipv4::kUdp) {
+    Udp *udp = reinterpret_cast<Udp *>(reinterpret_cast<uint8_t *>(ip) +
+                                       ip_bytes);  // Assumes a l-4 header
+    ft.client_ip = ip->src.value();
+    ft.server_ip = ip->dst.value();
+    ft.client_port = udp->src_port.value();
+    ft.server_port = udp->dst_port.value();
+    ft.protocol = ip->protocol;
+  } else if (ip->protocol & Ipv4::kTcp) {
+    Tcp *tcp = reinterpret_cast<Tcp *>(reinterpret_cast<uint8_t *>(ip) +
+                                       ip_bytes);  // Assumes a l-4 header
 
-//   if (ip->protocol & Ipv4::kUdp) {
-//     Udp *udp = reinterpret_cast<Udp *>(reinterpret_cast<uint8_t *>(ip) +
-//                                        ip_bytes);  // Assumes a l-4 header
-//     ft.client_ip = ip->src.value();
-//     ft.server_ip = ip->dst.value();
-//     ft.client_port = udp->src_port.value();
-//     ft.server_port = udp->dst_port.value();
-//     ft.protocol = ip->protocol;
-//   } else if (ip->protocol & Ipv4::kTcp) {
-//     Tcp *tcp = reinterpret_cast<Tcp *>(reinterpret_cast<uint8_t *>(ip) +
-//                                        ip_bytes);  // Assumes a l-4 header
-
-//     ft.protocol = ip->protocol;
-//     // This is a server responding to a client
-//     if ((tcp->flags & Tcp::Flag::kSyn) && (tcp->flags & Tcp::Flag::kAck)) {
-//       ft.client_ip = ip->dst.value();
-//       ft.server_ip = ip->src.value();
-//       ft.client_port = tcp->dst_port.value();
-//       ft.server_port = tcp->src_port.value();
-//     } else {
-//       ft.client_ip = ip->src.value();
-//       ft.server_ip = ip->dst.value();
-//       ft.client_port = tcp->src_port.value();
-//       ft.server_port = tcp->dst_port.value();
-//     }
-//   }
-//   return ft;
-// };
+    ft.protocol = ip->protocol;
+    // This is a server responding to a client
+    if ((tcp->flags & Tcp::Flag::kSyn) && (tcp->flags & Tcp::Flag::kAck)) {
+      ft.client_ip = ip->dst.value();
+      ft.server_ip = ip->src.value();
+      ft.client_port = tcp->dst_port.value();
+      ft.server_port = tcp->src_port.value();
+    } else {
+      ft.client_ip = ip->src.value();
+      ft.server_ip = ip->dst.value();
+      ft.client_port = tcp->src_port.value();
+      ft.server_port = tcp->dst_port.value();
+    }
+  }
+  return ft;
+};
 
 }  // namespace utils
 }  // namespace bess
