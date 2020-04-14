@@ -272,6 +272,7 @@ void TlsParser::ProcessBatch(Context *ctx, bess::PacketBatch *batch) {
           break;
         }
       }
+      EmitPacket(ctx, pkt);
     }
     DropPacket(ctx, pkt);
   }

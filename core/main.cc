@@ -103,6 +103,15 @@ int main(int argc, char *argv[]) {
 
   rte_eal_mp_wait_lcore();
 
+  const auto &it = PortBuilder::all_ports();
+
+  for (auto i = it.begin(); i != it.end(); ++i) {
+    Port::PortStats stats = i->second->GetPortStats();
+    LOG(INFO) << "PACKETS Received: " << stats.inc.packets;
+    LOG(INFO) << "PACKETS Dropped: " << stats.inc.dropped;
+    LOG(INFO) << "BYTES Received: " << stats.inc.bytes;
+  }
+
   LOG(INFO) << "BESS daemon has been gracefully shut down";
 
   return 0;
