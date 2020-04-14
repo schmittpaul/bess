@@ -28,6 +28,7 @@
 
 #include "../utils/ip.h"
 #include "../utils/time.h"
+#include "../port.h"
 
 #include <../utils/json.h>
 #include <fstream>
@@ -128,6 +129,15 @@ struct task_result nm_stats::RunTask(Context *, bess::PacketBatch *, void *) {
              ToIpv4Address(be32_t(ii->first.server_ip)).c_str(),
              ii->first.client_port, ii->first.server_port,
              ii->second->serverName.c_str());
+             
+    const auto &it = PortBuilder::all_ports();
+
+    for (auto i = it.begin(); i != it.end(); ++i) {
+      Port::PortStats stats = i->second->GetPortStats();
+      LOG(INFO) << "PACKETS Received: " << stats.inc.packets;
+      LOG(INFO) << "PACKETS Dropped: " << stats.inc.dropped;
+      LOG(INFO) << "BYTES Received: " << stats.inc.bytes;
+    }
     printf("*********************************\n");
   }
 
