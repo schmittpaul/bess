@@ -112,7 +112,7 @@ CXXARCHFLAGS ?= -march=native
 CXXFLAGS += -std=c++17 -g3 -ggdb3 $(CXXARCHFLAGS) \
             -isystem $(DPDK_INC_DIR) -isystem $(COREDIR) \
             -isystem $(dir $<).. -isystem $(COREDIR)/modules \
-            -D_GNU_SOURCE \
+            -D_GNU_SOURCE -pg \
             -Werror -Wall -Wextra -Wcast-align -Wno-error=deprecated-declarations \
             $(PKG_CFLAGS)
 
@@ -386,103 +386,103 @@ $(eval $(call BUILD, \
         CXX, \
         pb/%.pb.o, \
         pb/%.pb.cc $(PROTO_HEADERS), \
-        $(CXX) -o $$@ -c $$< $$(CXXFLAGS) $(PERMISSIVE) $$(DEPFLAGS)))
+        $(CXX) -pg -o $$@ -c $$< $$(CXXFLAGS) $(PERMISSIVE) $$(DEPFLAGS)))
 
 $(eval $(call BUILD, \
         DRIVER_CXX, \
         drivers/%.o, \
         drivers/%.cc $(PROTO_HEADERS), \
-        $(CXX) -o $$@ -c $$< $$(CXXFLAGS) $$(DEPFLAGS)))
+        $(CXX) -pg -o $$@ -c $$< $$(CXXFLAGS) $$(DEPFLAGS)))
 
 $(eval $(call BUILD, \
         MODULE_CXX, \
         modules/%.o, \
         modules/%.cc $(PROTO_HEADERS), \
-        $(CXX) -o $$@ -c $$< $$(CXXFLAGS) $$(DEPFLAGS) -fPIC))
+        $(CXX) -pg -o $$@ -c $$< $$(CXXFLAGS) $$(DEPFLAGS) -fPIC))
 
 $(eval $(call BUILD, \
         UTILS_CXX, \
         utils/%.o, \
         utils/%.cc $(PROTO_HEADERS), \
-        $(CXX) -o $$@ -c $$< $$(CXXFLAGS) $$(DEPFLAGS)))
+        $(CXX) -pg -o $$@ -c $$< $$(CXXFLAGS) $$(DEPFLAGS)))
 
 $(eval $(call BUILD, \
         GATEHOOK_CXX, \
         gate_hooks/%.o, \
         gate_hooks/%.cc $(PROTO_HEADERS), \
-        $(CXX) -o $$@ -c $$< $$(CXXFLAGS) $$(DEPFLAGS)))
+        $(CXX) -pg -o $$@ -c $$< $$(CXXFLAGS) $$(DEPFLAGS)))
 
 $(eval $(call BUILD, \
         RESUMEHOOK_CXX, \
         resume_hooks/%.o, \
         resume_hooks/%.cc $(PROTO_HEADERS), \
-        $(CXX) -o $$@ -c $$< $$(CXXFLAGS) $$(DEPFLAGS)))
+        $(CXX) -pg -o $$@ -c $$< $$(CXXFLAGS) $$(DEPFLAGS)))
 
 $(eval $(call BUILD, \
         MODULE_LD, \
         %.so, \
         %.o, \
-        $(CXX) -shared -o $$@ $$^ $(LDFLAGS)))
+        $(CXX) -pg -shared -o $$@ $$^ $(LDFLAGS)))
 
 $(eval $(call BUILD, \
         MODULE_TEST_LD, \
         modules/%_test, \
         modules/%_test.o modules/%.o gtest-all.o gtest_main.o bess.a, \
-        $(CXX) -o $$@ $$^ $(LDFLAGS) $(LIBS)))
+        $(CXX) -pg -o $$@ $$^ $(LDFLAGS) $(LIBS)))
 
 $(eval $(call BUILD, \
         MODULE_BENCH_LD, \
         modules/%_bench, \
         modules/%_bench.o modules/%.o bess.a, \
-        $(CXX) -o $$@ $$^ $(LDFLAGS) $(LIBS) -lbenchmark))
+        $(CXX) -pg -o $$@ $$^ $(LDFLAGS) $(LIBS) -lbenchmark))
 
 $(eval $(call BUILD, \
         CXX, \
         %.o, \
         %.cc $(PROTO_HEADERS), \
-        $(CXX) -o $$@ -c $$< $$(CXXFLAGS) $$(DEPFLAGS)))
+        $(CXX) -pg -o $$@ -c $$< $$(CXXFLAGS) $$(DEPFLAGS)))
 
 $(eval $(call BUILD, \
         LD, \
         $(EXEC), \
         $(OBJS), \
-        $(CXX) -o $$@ $$^ $(LDFLAGS) $(LIBS)))
+        $(CXX) -pg -o $$@ $$^ $(LDFLAGS) $(LIBS)))
 
 $(eval $(call BUILD, \
         TEST_CXX, \
         %_test.o, \
         %_test.cc $(PROTO_HEADERS), \
-        $(CXX) -o $$@ -c $$< $$(CXXFLAGS) $$(DEPFLAGS)))
+        $(CXX) -pg -o $$@ -c $$< $$(CXXFLAGS) $$(DEPFLAGS)))
 
 $(eval $(call BUILD, \
         TEST_LD, \
         %_test, \
         %_test.o gtest-all.o gtest_main.o bess.a, \
-        $(CXX) -o $$@ $$^ $(LDFLAGS) $(LIBS)))
+        $(CXX) -pg -o $$@ $$^ $(LDFLAGS) $(LIBS)))
 
 $(eval $(call BUILD, \
         TEST_LD, \
         $(TEST_ALL_EXEC), \
         $(TEST_OBJS) $(MODULE_OBJS) gtest-all.o bess.a, \
-        $(CXX) -o $$@ $$^ $(LDFLAGS) $(LIBS)))
+        $(CXX) -pg -o $$@ $$^ $(LDFLAGS) $(LIBS)))
 
 $(eval $(call BUILD, \
         TEST_CXX, \
         gtest-all.o, \
         $(GTEST_DIR)/src/gtest-all.cc, \
-        $(CXX) -o $$@ -c $$< -isystem $(GTEST_DIR)/include $$(CXXFLAGS) $$(DEPFLAGS)))
+        $(CXX) -pg -o $$@ -c $$< -isystem $(GTEST_DIR)/include $$(CXXFLAGS) $$(DEPFLAGS)))
 
 $(eval $(call BUILD, \
         BENCH_CXX, \
         %_bench.o, \
         %_bench.cc $(PROTO_HEADERS), \
-        $(CXX) -o $$@ -c $$< $$(CXXFLAGS) $$(DEPFLAGS)))
+        $(CXX) -pg -o $$@ -c $$< $$(CXXFLAGS) $$(DEPFLAGS)))
 
 $(eval $(call BUILD, \
         BENCH_LD, \
         %_bench, \
         %_bench.o bess.a, \
-        $(CXX) -o $$@ $$^ $(LDFLAGS) -lbenchmark $(LIBS)))
+        $(CXX) -pg -o $$@ $$^ $(LDFLAGS) -lbenchmark $(LIBS)))
 
 LIB_OBJS := $(filter-out main.o, $(OBJS))
 

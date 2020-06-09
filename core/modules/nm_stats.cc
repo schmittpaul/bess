@@ -114,14 +114,6 @@ struct task_result nm_stats::RunTask(Context *, bess::PacketBatch *, void *) {
     printf("Timer: %f\n", now);
     lasttime = now;
 
-    // for (auto ii = NMFC.flowcache.begin(); ii != NMFC.flowcache.end(); ii++)
-    //   printf("STATS: %s %s %d %d %d\n",
-    //          ToIpv4Address(be32_t(ii->first.client_ip)).c_str(),
-    //          ToIpv4Address(be32_t(ii->first.server_ip)).c_str(),
-    //          ii->first.client_port, ii->first.server_port,
-    //          ii->second->fc.clientPackets);
-    // printf("*********************************\n");
-
     for (auto ii = NMFC.flowServiceMap.begin(); ii != NMFC.flowServiceMap.end();
          ii++)
       printf("SERVICES: %s %s %d %d %s\n",
