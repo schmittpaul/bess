@@ -35,8 +35,7 @@ nm1::netmicroscope()
 
 
 
-input0 -> rr::RoundRobin(gates=[0, 1],mode='packet')#crypto::cryptopANT()
-#crypto -> nm
+input0 -> rr::RoundRobin(gates=[0, 1],mode='packet')
 rr:0 -> nm0
 rr:1 -> nm1
 

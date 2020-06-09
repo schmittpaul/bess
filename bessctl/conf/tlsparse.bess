@@ -1,8 +1,16 @@
 s::Sink()
 
-myport::PMDPort(port_id=0, num_inc_q=1, num_out_q=0)
-input0::QueueInc(port=myport, qid=0) #This module will read from myport on queue 0
 
+# read from the port
+myport::PMDPort(port_id=0, num_inc_q=1, num_out_q=0)
+input0::QueueInc(port=myport, qid=0) 
+
+# nm_stats holds the services map and the flowcache that is shared by worker modules
+# nm_stats prints basic stats to the bessd.INFO file periodically
 stats::nm_stats()
+bess.add_tc('slow', policy='rate_limit', resource='count', limit={'count': 1000})
+stats.attach_task('slow')
+
+# tls parser checks SNI information and if a flow matches it populates the flowcache
 input0 -> tls::TlsParser()
 tls -> s
